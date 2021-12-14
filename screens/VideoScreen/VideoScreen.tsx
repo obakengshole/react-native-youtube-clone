@@ -8,7 +8,7 @@ import {
   FlatList,
   Pressable
 } from "react-native";
-// import BottomSheet from "@gorhom/bottom-sheet";
+import { BottomSheetModal, BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import styles from "./styles";
 import VideoListItem from "../../components/VideoListItem";
 import VideoPlayer from "../../components/VideoPlayer";
@@ -16,11 +16,15 @@ import VideoPlayer from "../../components/VideoPlayer";
 import video from "../../assets/data/video.json";
 import videos from "../../assets/data/videos.json";
 import { AntDesign } from "@expo/vector-icons";
+import VideoComment from "../../components/VideoComment";
+
+import comments from '../../assets/data/comments.json'
+import VideoComments from "../../components/VideoComments";
 
 const VideoScreen = () => {
 
-  // const commentsSheetRef = useRef<BottomSheet(null)
-  const commentsSheetRef = useRef(null)
+  const commentsSheetRef = useRef<BottomSheetModal>(null)
+  // const commentsSheetRef = useRef(null)
 
   let viewsString = video.views.toString();
   if (video.views > 1000000) {
@@ -30,7 +34,7 @@ const VideoScreen = () => {
   }
 
   const openComments = () => {
-    commentsSheetRef.current?.expand()
+    commentsSheetRef.current?.present()
   }
 
   return (
@@ -105,26 +109,28 @@ const VideoScreen = () => {
         {/* Comments */}
         <Pressable onPress={openComments} style={{ padding: 10, marginVertical: 10 }}>
           <Text style={{ color: "white" }}>Comments 333</Text>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginVertical: 10,
-            }}
-          >
-            <Image
-              style={{ width: 35, height: 35, borderRadius: 20 }}
-              source={{ uri: video.user.image }}
-            />
-            <Text style={{ color: "white", marginLeft: 10 }}>
-              Lorem asdsf asdfasdfd as fasdf afawe herthrthr rhrthr Lorem asdsf
-              asdfasdfd as fasdf afawe herthrthr rhrthr
-            </Text>
-          </View>
-          </Pressable>
+          {comments.length > 0 && <VideoComment comment={comments[0]} /> }
+        </Pressable>
+        <BottomSheetModal
+          ref={commentsSheetRef}
+          snapPoints={['25%', '50%']}
+          index={1}
+          backgroundComponent={({ style }) => (
+            <View style={[style, { backgroundColor: "#4d4d4d" }]} />
+          )}
+        >
+          <VideoComments />
+        </BottomSheetModal>
+
           {/* 
-      <BottomSheet ref={commentsSheetRef} snapPoints={[0, '100%']} index={-1} enablePanDownToClose={false}>
-        <Text>Hello</Text>
+      <BottomSheet 
+        ref={commentsSheetRef} 
+        snapPoints={[0, '100%']} 
+        index={-1}
+        style={{ backgroundColor: 'red'}} 
+        enablePanDownToClose={false}
+      >
+            <VideoComments />
       </BottomSheet> */}
       </View>
 
@@ -136,11 +142,13 @@ const VideoScreen = () => {
 const VideoScreenWithRecommendations = () => {
   return (
     <SafeAreaView style={{ backgroundColor: "#141414", flex: 1 }}>
-      <FlatList
-        data={videos}
-        renderItem={({ item }) => <VideoListItem video={item} />}
-        ListHeaderComponent={VideoScreen}
-      />
+      <BottomSheetModalProvider>
+        <FlatList
+          data={videos}
+          renderItem={({ item }) => <VideoListItem video={item} />}
+          ListHeaderComponent={VideoScreen}
+        />
+      </BottomSheetModalProvider>
     </SafeAreaView>
   );
 };
